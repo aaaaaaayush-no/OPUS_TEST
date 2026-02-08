@@ -7,7 +7,7 @@ export default function TimelinePanel() {
 
   if (snapshots.length === 0) {
     return (
-      <div className="p-4 text-gray-500 text-sm">
+      <div className="cf-panel-content" style={{ color: 'var(--text-muted)' }}>
         Run code to see execution timeline
       </div>
     );
@@ -25,26 +25,32 @@ export default function TimelinePanel() {
   );
 
   return (
-    <div className="p-3 text-sm overflow-auto h-full">
-      <div className="mb-3 text-xs text-gray-400">
+    <div className="cf-panel-content cf-scrollbar" style={{ overflow: 'auto' }}>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>
         Click any step to jump to that execution state (time-travel)
       </div>
 
       {/* Compact timeline bar */}
-      <div className="flex flex-wrap gap-0.5 mb-4">
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, marginBottom: 16 }}>
         {snapshots.map((snap, i) => (
           <button
             key={i}
             onClick={() => jumpToStep(i)}
-            className={`w-3 h-6 rounded-sm transition-all ${
-              i === currentStepIndex
-                ? 'bg-blue-500 ring-1 ring-blue-300'
+            style={{
+              width: 10,
+              height: 20,
+              borderRadius: 2,
+              border: i === currentStepIndex ? '2px solid var(--accent-blue)' : '1px solid var(--border-light)',
+              background: i === currentStepIndex
+                ? 'var(--accent-blue)'
                 : snap.errorState
-                  ? 'bg-red-500/60 hover:bg-red-500'
+                  ? 'var(--accent-error-light)'
                   : snap.callStack.length > 0
-                    ? 'bg-purple-500/40 hover:bg-purple-500/70'
-                    : 'bg-gray-600 hover:bg-gray-500'
-            }`}
+                    ? 'var(--accent-purple-light)'
+                    : 'var(--bg-secondary)',
+              cursor: 'pointer',
+              padding: 0,
+            }}
             title={`Step ${i + 1}: Line ${snap.currentLine}${
               snap.callStack.length > 0
                 ? ` (in ${snap.callStack[snap.callStack.length - 1].functionName})`
@@ -55,29 +61,38 @@ export default function TimelinePanel() {
       </div>
 
       {/* Line execution counts */}
-      <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">
+      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 8 }}>
         Lines Executed
-      </h3>
-      <div className="space-y-0.5">
+      </div>
+      <div>
         {Array.from(lineChanges.entries())
           .sort(([a], [b]) => a - b)
           .filter(([line]) => line > 0)
           .map(([line, steps]) => (
             <div
               key={line}
-              className="flex items-center gap-2 px-2 py-0.5 rounded hover:bg-gray-800 cursor-pointer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '3px 8px',
+                borderRadius: 3,
+                cursor: 'pointer',
+              }}
               onClick={() => jumpToStep(steps[steps.length - 1])}
             >
-              <span className="text-gray-500 w-10 text-right text-xs">L{line}</span>
-              <div className="flex-1 bg-gray-800 rounded-full h-1.5 overflow-hidden">
+              <span style={{ color: 'var(--text-muted)', width: 40, textAlign: 'right', fontSize: 12 }}>L{line}</span>
+              <div style={{ flex: 1, background: 'var(--bg-secondary)', borderRadius: 4, height: 6, overflow: 'hidden' }}>
                 <div
-                  className="bg-blue-500 h-full rounded-full"
                   style={{
+                    background: 'var(--accent-blue)',
+                    height: '100%',
+                    borderRadius: 4,
                     width: `${Math.min(100, (steps.length / snapshots.length) * 100 * 5)}%`,
                   }}
                 />
               </div>
-              <span className="text-gray-500 text-xs w-6 text-right">{steps.length}×</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: 12, width: 24, textAlign: 'right' }}>{steps.length}×</span>
             </div>
           ))}
       </div>

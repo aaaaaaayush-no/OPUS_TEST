@@ -8,26 +8,26 @@ import { parseAST, markExecutingNodes } from '../../engine/treeUtils';
 import type { TreeNode, NodeCategory } from '../../engine/treeTypes';
 
 // ─── Color map for node categories ──────────────────────────────────────────
-const CATEGORY_COLORS: Record<NodeCategory, { bg: string; text: string; border: string }> = {
-  declaration: { bg: 'bg-blue-900/40', text: 'text-blue-300', border: 'border-blue-500/50' },
-  expression:  { bg: 'bg-green-900/40', text: 'text-green-300', border: 'border-green-500/50' },
-  statement:   { bg: 'bg-purple-900/40', text: 'text-purple-300', border: 'border-purple-500/50' },
-  literal:     { bg: 'bg-orange-900/40', text: 'text-orange-300', border: 'border-orange-500/50' },
-  operator:    { bg: 'bg-red-900/40', text: 'text-red-300', border: 'border-red-500/50' },
-  control:     { bg: 'bg-yellow-900/40', text: 'text-yellow-300', border: 'border-yellow-500/50' },
-  function:    { bg: 'bg-cyan-900/40', text: 'text-cyan-300', border: 'border-cyan-500/50' },
-  program:     { bg: 'bg-gray-800', text: 'text-gray-200', border: 'border-gray-500/50' },
+const CATEGORY_COLORS: Record<NodeCategory, { text: string; border: string }> = {
+  declaration: { text: 'cf-val-object', border: 'var(--accent-blue)' },
+  expression:  { text: 'cf-val-number', border: 'var(--accent-green)' },
+  statement:   { text: 'cf-val-string', border: 'var(--accent-purple)' },
+  literal:     { text: 'cf-val-number', border: 'var(--accent-warning)' },
+  operator:    { text: 'cf-val-string', border: 'var(--accent-error)' },
+  control:     { text: 'cf-val-function', border: 'var(--accent-warning)' },
+  function:    { text: 'cf-val-object', border: 'var(--accent-blue)' },
+  program:     { text: '', border: 'var(--text-muted)' },
 };
 
-const CATEGORY_BADGE_COLORS: Record<NodeCategory, string> = {
-  declaration: 'bg-blue-500/20 text-blue-300',
-  expression:  'bg-green-500/20 text-green-300',
-  statement:   'bg-purple-500/20 text-purple-300',
-  literal:     'bg-orange-500/20 text-orange-300',
-  operator:    'bg-red-500/20 text-red-300',
-  control:     'bg-yellow-500/20 text-yellow-300',
-  function:    'bg-cyan-500/20 text-cyan-300',
-  program:     'bg-gray-500/20 text-gray-300',
+const CATEGORY_BADGE: Record<NodeCategory, string> = {
+  declaration: 'cf-badge-blue',
+  expression:  'cf-badge-green',
+  statement:   'cf-badge-purple',
+  literal:     'cf-badge-warning',
+  operator:    'cf-badge-error',
+  control:     'cf-badge-warning',
+  function:    'cf-badge-blue',
+  program:     'cf-badge-blue',
 };
 
 // ─── Tree Node component ────────────────────────────────────────────────────
@@ -65,13 +65,19 @@ function ASTNodeView({ node, filter, searchTerm, onNodeClick, defaultExpanded = 
   const isExecuting = node.metadata.isExecuting;
 
   return (
-    <div className="ml-3">
+    <div style={{ marginLeft: 12 }}>
       <div
-        className={`flex items-center gap-1.5 py-0.5 px-1.5 rounded cursor-pointer transition-all text-xs
-          ${isExecuting ? 'ring-2 ring-yellow-400/60 bg-yellow-500/10' : ''}
-          ${matchesSearch && searchTerm ? 'bg-yellow-500/10' : ''}
-          hover:bg-gray-700/50
-        `}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '3px 6px',
+          borderRadius: 3,
+          cursor: 'pointer',
+          fontSize: 12,
+          background: isExecuting ? 'var(--accent-blue-light)' : matchesSearch && searchTerm ? 'var(--accent-warning-light)' : 'transparent',
+          border: isExecuting ? '1px solid var(--accent-blue)' : '1px solid transparent',
+        }}
         onClick={() => {
           if (hasChildren) setExpanded(!expanded);
           if (node.metadata.lineNumber) onNodeClick(node.metadata.lineNumber);
@@ -79,26 +85,26 @@ function ASTNodeView({ node, filter, searchTerm, onNodeClick, defaultExpanded = 
       >
         {/* Expand/collapse arrow */}
         {hasChildren ? (
-          <span className={`text-gray-500 w-3 text-center transition-transform ${expanded ? 'rotate-90' : ''}`}>
+          <span className="cf-tree-toggle" style={{ transform: expanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }}>
             ▶
           </span>
         ) : (
-          <span className="w-3 text-center text-gray-600">•</span>
+          <span style={{ width: 16, textAlign: 'center', color: 'var(--text-muted)' }}>•</span>
         )}
 
         {/* Node type badge */}
-        <span className={`px-1 py-0 rounded text-[10px] font-mono ${CATEGORY_BADGE_COLORS[category]}`}>
+        <span className={`cf-badge ${CATEGORY_BADGE[category]}`} style={{ fontSize: 10, fontFamily: 'var(--font-code)' }}>
           {node.type}
         </span>
 
         {/* Node label */}
-        <span className={`font-mono font-medium ${colors.text}`}>
+        <span className={colors.text} style={{ fontFamily: 'var(--font-code)', fontWeight: 500 }}>
           {node.label}
         </span>
 
         {/* Line number */}
         {node.metadata.lineNumber && (
-          <span className="text-gray-600 text-[10px] ml-auto">
+          <span style={{ color: 'var(--text-muted)', fontSize: 10, marginLeft: 'auto' }}>
             L{node.metadata.lineNumber}
           </span>
         )}
@@ -106,7 +112,7 @@ function ASTNodeView({ node, filter, searchTerm, onNodeClick, defaultExpanded = 
 
       {/* Children */}
       {expanded && hasChildren && (
-        <div className={`border-l ${colors.border} ml-1.5`}>
+        <div style={{ borderLeft: `1px solid ${colors.border}`, marginLeft: 6, paddingLeft: 2 }}>
           {node.children.map((child) => (
             <ASTNodeView
               key={child.id}
@@ -161,9 +167,9 @@ function ASTLegend() {
     { category: 'control', label: 'Control Flow' },
   ];
   return (
-    <div className="flex flex-wrap gap-2 px-3 py-1.5 border-b border-gray-700 text-[10px]">
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '6px 12px', borderBottom: '1px solid var(--border-light)', fontSize: 10 }}>
       {items.map(({ category, label }) => (
-        <span key={category} className={`px-1.5 py-0.5 rounded ${CATEGORY_BADGE_COLORS[category]}`}>
+        <span key={category} className={`cf-badge ${CATEGORY_BADGE[category]}`}>
           {label}
         </span>
       ))}
@@ -207,37 +213,54 @@ export default function ASTPanel() {
 
   if (parseError) {
     return (
-      <div className="p-4 text-red-400 text-sm">
-        <div className="font-bold mb-1">⚠️ Parse Error</div>
-        <div className="text-xs text-red-300">{parseError}</div>
+      <div className="cf-panel-content" style={{ color: 'var(--accent-error)' }}>
+        <div style={{ fontWeight: 600, marginBottom: 4 }}>⚠️ Parse Error</div>
+        <div style={{ fontSize: 12 }}>{parseError}</div>
       </div>
     );
   }
 
   if (!astTree) {
     return (
-      <div className="p-4 text-gray-500 text-sm">
+      <div className="cf-panel-content" style={{ color: 'var(--text-muted)' }}>
         Write code to see the Abstract Syntax Tree
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Toolbar */}
-      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-gray-700 bg-gray-800/50">
-        <span className="text-xs text-gray-400">{nodeCount} nodes</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', borderBottom: '1px solid var(--border-light)', background: 'var(--bg-header)' }}>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{nodeCount} nodes</span>
         <input
           type="text"
           placeholder="Search nodes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 bg-gray-700 text-xs text-gray-200 rounded px-2 py-1 outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-500"
+          style={{
+            flex: 1,
+            fontSize: 12,
+            padding: '4px 8px',
+            border: '1px solid var(--border-color)',
+            borderRadius: 4,
+            outline: 'none',
+            fontFamily: 'var(--font-ui)',
+            background: 'var(--bg-primary)',
+          }}
         />
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="bg-gray-700 text-xs text-gray-200 rounded px-2 py-1 outline-none"
+          style={{
+            fontSize: 12,
+            padding: '4px 8px',
+            border: '1px solid var(--border-color)',
+            borderRadius: 4,
+            outline: 'none',
+            fontFamily: 'var(--font-ui)',
+            background: 'var(--bg-primary)',
+          }}
         >
           <option value="all">All types</option>
           <option value="declaration">Declarations</option>
@@ -253,7 +276,7 @@ export default function ASTPanel() {
       <ASTLegend />
 
       {/* Tree */}
-      <div className="flex-1 overflow-auto p-2">
+      <div className="cf-scrollbar" style={{ flex: 1, overflow: 'auto', padding: 8 }}>
         <ASTNodeView
           node={astTree}
           filter={filter}

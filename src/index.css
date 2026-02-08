@@ -1,6 +1,17 @@
 @import "tailwindcss";
+@import "./styles/classic-theme.css";
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Monaco editor decoration overrides for classic theme */
+.cf-editor-current-line {
+  background: #EFF6FF !important;
+  border-left: 3px solid #2563EB !important;
+}
+
+.cf-editor-executed-line {
+  background: #F0FDF4 !important;
 }

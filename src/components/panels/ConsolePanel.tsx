@@ -11,7 +11,7 @@ export default function ConsolePanel() {
 
   if (!currentSnapshot) {
     return (
-      <div className="p-4 text-gray-500 text-sm font-mono">
+      <div className="cf-panel-content" style={{ fontFamily: 'var(--font-code)', color: 'var(--text-muted)' }}>
         {'>'} Console output will appear here
       </div>
     );
@@ -20,23 +20,26 @@ export default function ConsolePanel() {
   const { output, errorState } = currentSnapshot;
 
   return (
-    <div className="p-3 text-sm font-mono overflow-auto h-full">
+    <div className="cf-panel-content cf-scrollbar" style={{ fontFamily: 'var(--font-code)', overflow: 'auto' }}>
       {output.length === 0 && !errorState && (
-        <div className="text-gray-600">No output yet</div>
+        <div style={{ color: 'var(--text-muted)' }}>No output yet</div>
       )}
 
       {output.map((entry, i) => (
         <div
           key={i}
-          className={`py-0.5 px-2 rounded ${
-            entry.type === 'error'
-              ? 'text-red-400 bg-red-500/10'
+          style={{
+            padding: '3px 8px',
+            borderRadius: 3,
+            marginBottom: 2,
+            ...(entry.type === 'error'
+              ? { color: 'var(--accent-error)', background: 'var(--accent-error-light)' }
               : entry.type === 'warn'
-                ? 'text-yellow-400 bg-yellow-500/10'
+                ? { color: 'var(--accent-warning)', background: 'var(--accent-warning-light)' }
                 : entry.type === 'info'
-                  ? 'text-blue-400'
-                  : 'text-gray-300'
-          }`}
+                  ? { color: 'var(--accent-blue)' }
+                  : { color: 'var(--text-primary)' }),
+          }}
         >
           {entry.args.map((arg, j) => (
             <span key={j}>
@@ -48,8 +51,8 @@ export default function ConsolePanel() {
       ))}
 
       {errorState && (
-        <div className="mt-2 py-1 px-2 rounded bg-red-500/10 text-red-400">
-          <div className="font-bold">Error on line {errorState.line}:</div>
+        <div style={{ marginTop: 8, padding: '6px 8px', borderRadius: 3, background: 'var(--accent-error-light)', color: 'var(--accent-error)', border: '1px solid var(--accent-error)' }}>
+          <div style={{ fontWeight: 600 }}>Error on line {errorState.line}:</div>
           <div>{errorState.message}</div>
         </div>
       )}

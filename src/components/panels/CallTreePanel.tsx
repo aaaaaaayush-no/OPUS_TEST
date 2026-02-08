@@ -24,25 +24,14 @@ function formatValue(value: unknown): string {
 
 // ─── Depth color gradient ───────────────────────────────────────────────────
 const DEPTH_COLORS = [
-  'border-blue-500/50',
-  'border-green-500/50',
-  'border-purple-500/50',
-  'border-orange-500/50',
-  'border-cyan-500/50',
-  'border-pink-500/50',
-  'border-yellow-500/50',
-  'border-red-500/50',
-];
-
-const DEPTH_BG = [
-  'bg-blue-500/5',
-  'bg-green-500/5',
-  'bg-purple-500/5',
-  'bg-orange-500/5',
-  'bg-cyan-500/5',
-  'bg-pink-500/5',
-  'bg-yellow-500/5',
-  'bg-red-500/5',
+  'var(--accent-blue)',
+  'var(--accent-green)',
+  'var(--accent-purple)',
+  'var(--accent-warning)',
+  'var(--accent-blue)',
+  'var(--accent-error)',
+  'var(--accent-green)',
+  'var(--accent-purple)',
 ];
 
 // ─── Call Tree Node component ───────────────────────────────────────────────
@@ -56,7 +45,6 @@ function CallNodeView({ node, showDuplicates, currentStep }: CallNodeProps) {
   const [expanded, setExpanded] = useState(node.depth < 3);
   const hasChildren = node.children.length > 0;
   const depthColor = DEPTH_COLORS[node.depth % DEPTH_COLORS.length];
-  const depthBg = DEPTH_BG[node.depth % DEPTH_BG.length];
 
   // Filter duplicates if toggled off
   const visibleChildren = showDuplicates
@@ -66,59 +54,65 @@ function CallNodeView({ node, showDuplicates, currentStep }: CallNodeProps) {
   const hiddenCount = node.children.length - visibleChildren.length;
 
   return (
-    <div className={`ml-3 ${node.depth > 0 ? `border-l ${depthColor}` : ''}`}>
+    <div style={{ marginLeft: 12, borderLeft: node.depth > 0 ? `1px solid ${depthColor}` : 'none' }}>
       <div
-        className={`flex items-center gap-1.5 py-0.5 px-1.5 rounded cursor-pointer transition-all text-xs
-          ${depthBg}
-          ${node.callIndex === currentStep ? 'ring-1 ring-yellow-400/50' : ''}
-          hover:bg-gray-700/50
-        `}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '3px 6px',
+          borderRadius: 3,
+          cursor: 'pointer',
+          fontSize: 12,
+          background: node.callIndex === currentStep ? 'var(--accent-blue-light)' : 'transparent',
+          border: node.callIndex === currentStep ? '1px solid var(--accent-blue)' : '1px solid transparent',
+        }}
         onClick={() => hasChildren && setExpanded(!expanded)}
       >
         {/* Expand/collapse */}
         {hasChildren ? (
-          <span className={`text-gray-500 w-3 text-center transition-transform ${expanded ? 'rotate-90' : ''}`}>
+          <span className="cf-tree-toggle" style={{ transform: expanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.15s' }}>
             ▶
           </span>
         ) : (
-          <span className="w-3" />
+          <span style={{ width: 16 }} />
         )}
 
         {/* Function icon */}
-        <span className="text-[10px]">
+        <span style={{ fontSize: 10 }}>
           {node.isBaseCase ? '🟢' : node.isDuplicate ? '🔄' : '📎'}
         </span>
 
         {/* Function name */}
-        <span className={`font-mono font-medium ${
-          node.isBaseCase ? 'text-green-300' :
-          node.isDuplicate ? 'text-gray-400' :
-          'text-blue-300'
-        }`}>
+        <span style={{
+          fontFamily: 'var(--font-code)',
+          fontWeight: 500,
+          color: node.isBaseCase ? 'var(--accent-green)' : node.isDuplicate ? 'var(--text-muted)' : 'var(--accent-blue)',
+        }}>
           {node.functionName}
         </span>
 
         {/* Arguments */}
         {node.args.length > 0 && (
-          <span className="text-gray-400 font-mono">
+          <span style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-code)' }}>
             ({node.args.map(formatValue).join(', ')})
           </span>
         )}
 
         {/* Return value */}
         {node.returnValue !== undefined && (
-          <span className="text-yellow-300 font-mono ml-1">
+          <span style={{ color: 'var(--accent-warning)', fontFamily: 'var(--font-code)', marginLeft: 4 }}>
             → {formatValue(node.returnValue)}
           </span>
         )}
 
         {/* Depth badge */}
-        <span className="text-gray-600 text-[10px] ml-auto">
+        <span style={{ color: 'var(--text-muted)', fontSize: 10, marginLeft: 'auto' }}>
           d={node.depth}
         </span>
 
         {/* Call index */}
-        <span className="text-gray-600 text-[10px]">
+        <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>
           #{node.callIndex}
         </span>
       </div>
@@ -135,7 +129,7 @@ function CallNodeView({ node, showDuplicates, currentStep }: CallNodeProps) {
             />
           ))}
           {hiddenCount > 0 && (
-            <div className="ml-6 text-[10px] text-gray-500 py-0.5">
+            <div style={{ marginLeft: 24, fontSize: 10, color: 'var(--text-muted)', padding: '2px 0' }}>
               +{hiddenCount} duplicate subtree(s) hidden
             </div>
           )}
@@ -180,7 +174,7 @@ export default function CallTreePanel() {
 
   if (!callTree || snapshots.length === 0) {
     return (
-      <div className="p-4 text-gray-500 text-sm">
+      <div className="cf-panel-content" style={{ color: 'var(--text-muted)' }}>
         Run code to see the function call tree
       </div>
     );
@@ -189,40 +183,39 @@ export default function CallTreePanel() {
   // If no function calls were made
   if (callTree.children.length === 0) {
     return (
-      <div className="p-4 text-gray-500 text-sm">
+      <div className="cf-panel-content" style={{ color: 'var(--text-muted)' }}>
         No function calls detected. Try code with function invocations.
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Toolbar */}
-      <div className="flex items-center gap-3 px-3 py-1.5 border-b border-gray-700 bg-gray-800/50 text-xs">
-        <span className="text-gray-400">{totalCalls} calls</span>
-        <span className="text-gray-600">|</span>
-        <span className="text-gray-400">depth {depth}</span>
-        <label className="flex items-center gap-1 ml-auto cursor-pointer text-gray-400">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 12px', borderBottom: '1px solid var(--border-light)', background: 'var(--bg-header)', fontSize: 12 }}>
+        <span style={{ color: 'var(--text-muted)' }}>{totalCalls} calls</span>
+        <span style={{ color: 'var(--border-color)' }}>|</span>
+        <span style={{ color: 'var(--text-muted)' }}>depth {depth}</span>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto', cursor: 'pointer', color: 'var(--text-secondary)' }}>
           <input
             type="checkbox"
             checked={showDuplicates}
             onChange={(e) => setShowDuplicates(e.target.checked)}
-            className="rounded bg-gray-700 border-gray-600"
           />
           Show duplicates
         </label>
       </div>
 
       {/* Legend */}
-      <div className="flex gap-3 px-3 py-1 border-b border-gray-700 text-[10px] text-gray-400">
+      <div style={{ display: 'flex', gap: 12, padding: '4px 12px', borderBottom: '1px solid var(--border-light)', fontSize: 10, color: 'var(--text-muted)' }}>
         <span>🟢 Base case</span>
         <span>🔄 Duplicate</span>
         <span>📎 Call</span>
-        <span className="text-yellow-300">→ Return value</span>
+        <span style={{ color: 'var(--accent-warning)' }}>→ Return value</span>
       </div>
 
       {/* Tree */}
-      <div className="flex-1 overflow-auto p-2">
+      <div className="cf-scrollbar" style={{ flex: 1, overflow: 'auto', padding: 8 }}>
         <CallNodeView
           node={callTree}
           showDuplicates={showDuplicates}
