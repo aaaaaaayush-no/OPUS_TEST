@@ -82,7 +82,7 @@ export default function App() {
         </div>
 
         {/* Resizable Splitter */}
-        <ResizableSplitter onResize={handleSplitterResize} />
+        <ResizableSplitter onResize={handleSplitterResize} currentPercent={leftPanelWidth} />
 
         {/* Right Panel */}
         <div style={{ width: `${100 - leftPanelWidth}%`, display: 'flex', flexDirection: 'column', minHeight: 0, minWidth: 0 }}>

@@ -6,10 +6,22 @@ import { useCallback, useRef } from 'react';
 
 interface ResizableSplitterProps {
   onResize: (leftWidthPercent: number) => void;
+  currentPercent: number;
 }
 
-export default function ResizableSplitter({ onResize }: ResizableSplitterProps) {
+export default function ResizableSplitter({ onResize, currentPercent }: ResizableSplitterProps) {
   const dragRef = useRef<{ startX: number; containerWidth: number; startLeft: number } | null>(null);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const step = e.shiftKey ? 5 : 1;
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      onResize(Math.max(20, currentPercent - step));
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      onResize(Math.min(80, currentPercent + step));
+    }
+  }, [onResize, currentPercent]);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -49,8 +61,12 @@ export default function ResizableSplitter({ onResize }: ResizableSplitterProps) 
     <div
       className="cf-splitter"
       onMouseDown={handleMouseDown}
+      onKeyDown={handleKeyDown}
       role="separator"
       aria-orientation="vertical"
+      aria-valuenow={Math.round(currentPercent)}
+      aria-valuemin={20}
+      aria-valuemax={80}
       tabIndex={0}
     />
   );
