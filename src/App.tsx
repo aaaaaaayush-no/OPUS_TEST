@@ -14,6 +14,7 @@ import PopupWindow from './components/cursor/PopupWindow';
 import CursorControlPanel from './components/cursor/CursorControlPanel';
 import ExecutionTimeline from './components/cursor/ExecutionTimeline';
 import ResizableSplitter from './components/ResizableSplitter';
+import HorizontalSplitter from './components/HorizontalSplitter';
 import { useExecutionStore } from './store/executionStore';
 
 type PanelTab = 'variables' | 'callstack' | 'console' | 'timeline' | 'ast' | 'calltree' | 'cfg' | 'flowchart';
@@ -25,9 +26,14 @@ export default function App() {
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [trailLength, setTrailLength] = useState(10);
   const [leftPanelWidth, setLeftPanelWidth] = useState(50);
+  const [topPanelHeight, setTopPanelHeight] = useState(70);
 
   const handleSplitterResize = useCallback((percent: number) => {
     setLeftPanelWidth(percent);
+  }, []);
+
+  const handleVerticalResize = useCallback((percent: number) => {
+    setTopPanelHeight(percent);
   }, []);
 
   const status = useExecutionStore((s) => s.status);
@@ -103,7 +109,7 @@ export default function App() {
           </div>
 
           {/* Tab Content */}
-          <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ height: `${topPanelHeight}%`, overflow: 'hidden', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             {activeTab === 'variables' && <VariablesPanel />}
             {activeTab === 'callstack' && <CallStackPanel />}
             {activeTab === 'console' && <ConsolePanel />}
@@ -114,8 +120,11 @@ export default function App() {
             {activeTab === 'flowchart' && <FlowchartPanel />}
           </div>
 
+          {/* Horizontal Splitter */}
+          <HorizontalSplitter onResize={handleVerticalResize} currentPercent={topPanelHeight} min={20} max={90} />
+
           {/* Cursor Control Panel */}
-          <div style={{ borderTop: '1px solid var(--border-light)' }}>
+          <div style={{ height: `${100 - topPanelHeight}%`, overflow: 'auto', minHeight: 0 }}>
             <CursorControlPanel
               showTrail={showTrail}
               setShowTrail={setShowTrail}
