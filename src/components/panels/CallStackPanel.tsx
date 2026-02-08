@@ -11,7 +11,7 @@ export default function CallStackPanel() {
 
   if (!currentSnapshot) {
     return (
-      <div className="p-4 text-gray-500 text-sm">
+      <div className="cf-panel-content" style={{ color: 'var(--text-muted)' }}>
         Run code to see call stack
       </div>
     );
@@ -21,9 +21,9 @@ export default function CallStackPanel() {
 
   if (callStack.length === 0) {
     return (
-      <div className="p-4 text-gray-500 text-sm">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-blue-400">📚</span>
+      <div className="cf-panel-content" style={{ color: 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span>📚</span>
           <span>Call stack is empty (global scope)</span>
         </div>
       </div>
@@ -31,57 +31,51 @@ export default function CallStackPanel() {
   }
 
   return (
-    <div className="p-3 text-sm overflow-auto h-full">
-      <div className="space-y-2">
-        {[...callStack].reverse().map((frame, i) => (
-          <div
-            key={i}
-            className={`border rounded p-3 ${
-              i === 0
-                ? 'border-blue-500/50 bg-blue-500/10'
-                : 'border-gray-700 bg-gray-800/50'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-1">
-              <span className="font-mono text-blue-300 font-medium">
+    <div className="cf-panel-content cf-scrollbar" style={{ overflow: 'auto' }}>
+      <table className="cf-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Function</th>
+            <th>Line</th>
+            <th>Arguments</th>
+            <th>Return</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[...callStack].reverse().map((frame, i) => (
+            <tr
+              key={i}
+              style={i === 0 ? { borderLeft: '3px solid var(--accent-blue)', background: 'var(--accent-blue-light)' } : {}}
+            >
+              <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{i}</td>
+              <td style={{ fontFamily: 'var(--font-code)', fontWeight: 600, color: 'var(--accent-blue)' }}>
                 {frame.functionName}()
-              </span>
-              <span className="text-gray-500 text-xs">
-                line {frame.sourceLocation.line}
-              </span>
-            </div>
-
-            {/* Arguments */}
-            {frame.arguments.length > 0 && (
-              <div className="mt-1 text-xs">
-                <span className="text-gray-500">args: </span>
+              </td>
+              <td style={{ color: 'var(--text-secondary)', fontSize: 12 }}>
+                {frame.sourceLocation.line}
+              </td>
+              <td style={{ fontFamily: 'var(--font-code)', fontSize: 12 }}>
                 {frame.arguments.map((arg, j) => (
-                  <span key={j} className="text-gray-400">
+                  <span key={j}>
                     {j > 0 && ', '}
-                    <span className="text-purple-300">{arg.name}</span>
-                    <span className="text-gray-600">=</span>
-                    <span className="text-green-300">{String(arg.value)}</span>
+                    <span style={{ color: 'var(--accent-purple)' }}>{arg.name}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>=</span>
+                    <span className="cf-val-number">{String(arg.value)}</span>
                   </span>
                 ))}
-              </div>
-            )}
-
-            {/* Return value */}
-            {frame.returnValue !== undefined && (
-              <div className="mt-1 text-xs">
-                <span className="text-gray-500">return: </span>
-                <span className="text-yellow-300">{String(frame.returnValue)}</span>
-              </div>
-            )}
-
-            {/* Stack depth indicator */}
-            {i === 0 && (
-              <div className="mt-1 text-xs text-gray-500">
-                ← current frame (depth: {callStack.length})
-              </div>
-            )}
-          </div>
-        ))}
+              </td>
+              <td style={{ fontFamily: 'var(--font-code)', fontSize: 12 }}>
+                {frame.returnValue !== undefined && (
+                  <span className="cf-val-number">{String(frame.returnValue)}</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
+        Depth: {callStack.length} frame{callStack.length !== 1 ? 's' : ''}
       </div>
     </div>
   );

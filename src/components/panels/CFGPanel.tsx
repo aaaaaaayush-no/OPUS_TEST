@@ -9,45 +9,45 @@ import { buildCFG, markExecutedCFGNodes } from '../../engine/treeUtils';
 import type { CFGNode, CFGEdge, ControlFlowGraph } from '../../engine/treeTypes';
 
 // ─── Node styling by type ───────────────────────────────────────────────────
-const NODE_STYLES: Record<CFGNode['type'], { bg: string; border: string; text: string; shape: string }> = {
-  start:        { bg: 'bg-green-900/60', border: 'border-green-400', text: 'text-green-300', shape: 'rounded-full' },
-  end:          { bg: 'bg-red-900/60',   border: 'border-red-400',   text: 'text-red-300',   shape: 'rounded-full' },
-  statement:    { bg: 'bg-gray-800',     border: 'border-gray-500',  text: 'text-gray-200',  shape: 'rounded' },
-  condition:    { bg: 'bg-yellow-900/40',border: 'border-yellow-500',text: 'text-yellow-200',shape: 'rotate-diamond' },
-  loop:         { bg: 'bg-purple-900/40',border: 'border-purple-500',text: 'text-purple-200',shape: 'rounded-lg' },
-  functionCall: { bg: 'bg-cyan-900/40',  border: 'border-cyan-500',  text: 'text-cyan-200',  shape: 'rounded-xl' },
-  return:       { bg: 'bg-orange-900/40',border: 'border-orange-500',text: 'text-orange-200',shape: 'rounded' },
+const NODE_STYLES: Record<CFGNode['type'], { fill: string; stroke: string; textFill: string }> = {
+  start:        { fill: '#ECFDF5', stroke: '#059669', textFill: '#059669' },
+  end:          { fill: '#FEF2F2', stroke: '#DC2626', textFill: '#DC2626' },
+  statement:    { fill: '#F9FAFB', stroke: '#6B7280', textFill: '#1F2937' },
+  condition:    { fill: '#FFFBEB', stroke: '#D97706', textFill: '#92400E' },
+  loop:         { fill: '#F5F3FF', stroke: '#7C3AED', textFill: '#5B21B6' },
+  functionCall: { fill: '#EFF6FF', stroke: '#2563EB', textFill: '#1D4ED8' },
+  return:       { fill: '#FFF7ED', stroke: '#EA580C', textFill: '#C2410C' },
 };
 
 const NODE_STROKE_COLORS: Record<CFGNode['type'], string> = {
-  start:        '#4ade80',
-  end:          '#f87171',
-  statement:    '#6b7280',
-  condition:    '#eab308',
-  loop:         '#a855f7',
-  functionCall: '#22d3ee',
-  return:       '#f97316',
+  start:        '#059669',
+  end:          '#DC2626',
+  statement:    '#6B7280',
+  condition:    '#D97706',
+  loop:         '#7C3AED',
+  functionCall: '#2563EB',
+  return:       '#EA580C',
 };
 
 // ─── Edge styling ───────────────────────────────────────────────────────────
-function getEdgeColor(edge: CFGEdge): string {
+function getEdgeStrokeColor(edge: CFGEdge): string {
   if (edge.wasExecuted) {
     switch (edge.type) {
-      case 'true': return 'text-green-400';
-      case 'false': return 'text-red-400';
-      case 'loop-back': return 'text-purple-400';
-      default: return 'text-blue-400';
+      case 'true': return '#059669';
+      case 'false': return '#DC2626';
+      case 'loop-back': return '#7C3AED';
+      default: return '#2563EB';
     }
   }
-  return 'text-gray-600';
+  return '#D1D5DB';
 }
 
-function getEdgeLabelColor(edge: CFGEdge): string {
+function getEdgeLabelFill(edge: CFGEdge): string {
   switch (edge.type) {
-    case 'true': return 'text-green-400';
-    case 'false': return 'text-red-400';
-    case 'loop-back': return 'text-purple-400';
-    default: return 'text-gray-500';
+    case 'true': return '#059669';
+    case 'false': return '#DC2626';
+    case 'loop-back': return '#7C3AED';
+    default: return '#6B7280';
   }
 }
 
@@ -152,15 +152,16 @@ function SVGNode({ layout, offsetX }: SVGNodeProps) {
           cx={cx}
           cy={cy}
           r={16}
-          className={`${node.wasExecuted ? 'fill-current opacity-80' : 'fill-current opacity-30'} ${style.text}`}
-          stroke="currentColor"
+          fill={node.wasExecuted ? style.fill : '#F3F4F6'}
+          stroke={style.stroke}
           strokeWidth={node.wasExecuted ? 2 : 1}
         />
         <text
           x={cx}
           y={cy + 4}
           textAnchor="middle"
-          className={`text-[10px] ${style.text} fill-current`}
+          fill={style.textFill}
+          fontSize="10"
         >
           {node.label}
         </text>
@@ -169,22 +170,22 @@ function SVGNode({ layout, offsetX }: SVGNodeProps) {
   }
 
   if (node.type === 'condition') {
-    // Diamond shape
     const size = 40;
     const points = `${cx},${cy - size / 2} ${cx + size},${cy} ${cx},${cy + size / 2} ${cx - size},${cy}`;
     return (
       <g>
         <polygon
           points={points}
-          className={`${node.wasExecuted ? 'fill-yellow-900/60' : 'fill-gray-800/60'}`}
-          stroke={node.wasExecuted ? '#eab308' : '#6b7280'}
+          fill={node.wasExecuted ? style.fill : '#F3F4F6'}
+          stroke={style.stroke}
           strokeWidth={node.wasExecuted ? 2 : 1}
         />
         <text
           x={cx}
           y={cy + 3}
           textAnchor="middle"
-          className={`text-[9px] ${node.wasExecuted ? 'fill-yellow-200' : 'fill-gray-400'}`}
+          fill={node.wasExecuted ? style.textFill : '#9CA3AF'}
+          fontSize="9"
         >
           {node.label.length > 18 ? node.label.slice(0, 18) + '…' : node.label}
         </text>
@@ -192,10 +193,9 @@ function SVGNode({ layout, offsetX }: SVGNodeProps) {
     );
   }
 
-  // Rectangle with rounded corners
   const w = 140;
   const h = 30;
-  const strokeColor = node.wasExecuted ? NODE_STROKE_COLORS[node.type] : '#4b5563';
+  const strokeColor = node.wasExecuted ? NODE_STROKE_COLORS[node.type] : '#D1D5DB';
   const isLoop = node.type === 'loop';
 
   return (
@@ -206,9 +206,7 @@ function SVGNode({ layout, offsetX }: SVGNodeProps) {
         width={w}
         height={h}
         rx={isLoop ? 12 : node.type === 'functionCall' ? 15 : 4}
-        fill={node.wasExecuted ? undefined : '#1f2937'}
-        className={node.wasExecuted ? style.bg.replace('bg-', 'fill-').replace(/\/\d+/, '') : undefined}
-        opacity={node.wasExecuted ? 0.8 : 0.4}
+        fill={node.wasExecuted ? style.fill : '#F9FAFB'}
         stroke={strokeColor}
         strokeWidth={node.wasExecuted ? 2 : 1}
         strokeDasharray={isLoop ? '4 2' : undefined}
@@ -217,7 +215,8 @@ function SVGNode({ layout, offsetX }: SVGNodeProps) {
         x={cx}
         y={cy + 3}
         textAnchor="middle"
-        className={`text-[10px] ${node.wasExecuted ? style.text : 'text-gray-500'} fill-current`}
+        fill={node.wasExecuted ? style.textFill : '#9CA3AF'}
+        fontSize="10"
       >
         {node.label.length > 20 ? node.label.slice(0, 20) + '…' : node.label}
       </text>
@@ -239,26 +238,23 @@ function SVGEdge({ edge, sourceLayout, targetLayout, offsetX }: SVGEdgeProps) {
   const tx = targetLayout.x + offsetX;
   const ty = targetLayout.y;
 
-  const color = getEdgeColor(edge);
-  const labelColor = getEdgeLabelColor(edge);
+  const strokeColor = getEdgeStrokeColor(edge);
+  const labelFill = getEdgeLabelFill(edge);
   const isBackEdge = edge.type === 'loop-back';
 
-  // Calculate midpoint for label
   const mx = (sx + tx) / 2;
   const my = (sy + ty) / 2;
 
   if (isBackEdge) {
-    // Draw a curved back-edge
     const curveOffset = 80;
     return (
       <g>
         <path
           d={`M ${sx} ${sy} C ${sx + curveOffset} ${sy + 20}, ${tx + curveOffset} ${ty - 20}, ${tx} ${ty}`}
           fill="none"
-          stroke="currentColor"
+          stroke={strokeColor}
           strokeWidth={edge.wasExecuted ? 1.5 : 0.5}
           strokeDasharray="4 2"
-          className={color}
           markerEnd="url(#arrowhead)"
         />
       </g>
@@ -272,16 +268,16 @@ function SVGEdge({ edge, sourceLayout, targetLayout, offsetX }: SVGEdgeProps) {
         y1={sy}
         x2={tx}
         y2={ty}
-        stroke="currentColor"
+        stroke={strokeColor}
         strokeWidth={edge.wasExecuted ? 1.5 : 0.5}
-        className={color}
         markerEnd="url(#arrowhead)"
       />
       {edge.label && (
         <text
           x={mx + 8}
           y={my}
-          className={`text-[9px] ${labelColor} fill-current`}
+          fill={labelFill}
+          fontSize="9"
         >
           {edge.label}
         </text>
@@ -315,7 +311,7 @@ export default function CFGPanel() {
 
   if (!cfg || !layout) {
     return (
-      <div className="p-4 text-gray-500 text-sm">
+      <div className="cf-panel-content" style={{ color: 'var(--text-muted)' }}>
         Write code to see the Control Flow Graph
       </div>
     );
@@ -337,16 +333,16 @@ export default function CFGPanel() {
   const coveragePercent = totalCount > 0 ? Math.round((executedCount / totalCount) * 100) : 0;
 
   return (
-    <div className="flex flex-col h-full">
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Toolbar */}
-      <div className="flex items-center gap-3 px-3 py-1.5 border-b border-gray-700 bg-gray-800/50 text-xs">
-        <span className="text-gray-400">{cfg.nodes.length} nodes</span>
-        <span className="text-gray-600">|</span>
-        <span className="text-gray-400">{cfg.edges.length} edges</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '6px 12px', borderBottom: '1px solid var(--border-light)', background: 'var(--bg-header)', fontSize: 12 }}>
+        <span style={{ color: 'var(--text-muted)' }}>{cfg.nodes.length} nodes</span>
+        <span style={{ color: 'var(--border-color)' }}>|</span>
+        <span style={{ color: 'var(--text-muted)' }}>{cfg.edges.length} edges</span>
         {snapshots.length > 0 && (
           <>
-            <span className="text-gray-600">|</span>
-            <span className={`${coveragePercent === 100 ? 'text-green-400' : 'text-yellow-400'}`}>
+            <span style={{ color: 'var(--border-color)' }}>|</span>
+            <span style={{ color: coveragePercent === 100 ? 'var(--accent-green)' : 'var(--accent-warning)' }}>
               {coveragePercent}% coverage
             </span>
           </>
@@ -354,23 +350,23 @@ export default function CFGPanel() {
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-2 px-3 py-1 border-b border-gray-700 text-[10px]">
-        <span className="text-green-400">● Start</span>
-        <span className="text-red-400">● End</span>
-        <span className="text-yellow-400">◆ Condition</span>
-        <span className="text-purple-400">▢ Loop</span>
-        <span className="text-gray-400">□ Statement</span>
-        <span className="text-cyan-400">▣ Function</span>
-        <span className="text-orange-400">◯ Return</span>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, padding: '4px 12px', borderBottom: '1px solid var(--border-light)', fontSize: 10 }}>
+        <span style={{ color: '#059669' }}>● Start</span>
+        <span style={{ color: '#DC2626' }}>● End</span>
+        <span style={{ color: '#D97706' }}>◆ Condition</span>
+        <span style={{ color: '#7C3AED' }}>▢ Loop</span>
+        <span style={{ color: '#6B7280' }}>□ Statement</span>
+        <span style={{ color: '#2563EB' }}>▣ Function</span>
+        <span style={{ color: '#EA580C' }}>◯ Return</span>
       </div>
 
       {/* Graph */}
-      <div className="flex-1 overflow-auto p-2">
+      <div className="cf-scrollbar" style={{ flex: 1, overflow: 'auto', padding: 8 }}>
         <svg
           width={svgWidth}
           height={svgHeight}
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          className="mx-auto"
+          style={{ margin: '0 auto', display: 'block' }}
         >
           <defs>
             <marker
@@ -383,7 +379,7 @@ export default function CFGPanel() {
             >
               <polygon
                 points="0 0, 8 3, 0 6"
-                className="fill-gray-400"
+                fill="#9CA3AF"
               />
             </marker>
           </defs>
