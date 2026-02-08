@@ -19,6 +19,16 @@ const NODE_STYLES: Record<CFGNode['type'], { bg: string; border: string; text: s
   return:       { bg: 'bg-orange-900/40',border: 'border-orange-500',text: 'text-orange-200',shape: 'rounded' },
 };
 
+const NODE_STROKE_COLORS: Record<CFGNode['type'], string> = {
+  start:        '#4ade80',
+  end:          '#f87171',
+  statement:    '#6b7280',
+  condition:    '#eab308',
+  loop:         '#a855f7',
+  functionCall: '#22d3ee',
+  return:       '#f97316',
+};
+
 // ─── Edge styling ───────────────────────────────────────────────────────────
 function getEdgeColor(edge: CFGEdge): string {
   if (edge.wasExecuted) {
@@ -185,7 +195,7 @@ function SVGNode({ layout, offsetX }: SVGNodeProps) {
   // Rectangle with rounded corners
   const w = 140;
   const h = 30;
-  const borderColor = node.wasExecuted ? style.border.replace('border-', '') : 'gray-600';
+  const strokeColor = node.wasExecuted ? NODE_STROKE_COLORS[node.type] : '#4b5563';
   const isLoop = node.type === 'loop';
 
   return (
@@ -196,9 +206,10 @@ function SVGNode({ layout, offsetX }: SVGNodeProps) {
         width={w}
         height={h}
         rx={isLoop ? 12 : node.type === 'functionCall' ? 15 : 4}
-        className={`${node.wasExecuted ? style.bg.replace('bg-', 'fill-').replace(/\/\d+/, '') : 'fill-gray-800/60'}`}
-        style={{ fill: node.wasExecuted ? undefined : '#1f2937', opacity: node.wasExecuted ? 0.8 : 0.4 }}
-        stroke={node.wasExecuted ? `var(--color-${borderColor})` : '#4b5563'}
+        fill={node.wasExecuted ? undefined : '#1f2937'}
+        className={node.wasExecuted ? style.bg.replace('bg-', 'fill-').replace(/\/\d+/, '') : undefined}
+        opacity={node.wasExecuted ? 0.8 : 0.4}
+        stroke={strokeColor}
         strokeWidth={node.wasExecuted ? 2 : 1}
         strokeDasharray={isLoop ? '4 2' : undefined}
       />

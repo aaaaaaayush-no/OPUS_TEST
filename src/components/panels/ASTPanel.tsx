@@ -199,10 +199,10 @@ export default function ASTPanel() {
 
   const nodeCount = useMemo(() => (astTree ? countNodes(astTree) : 0), [astTree]);
 
-  const handleNodeClick = useCallback((lineNumber: number) => {
-    // The click-to-highlight interaction is handled by the parent via the store
-    // For now we log it – in a full implementation this would scroll the editor
-    console.log('AST node clicked, line:', lineNumber);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleNodeClick = useCallback((_lineNumber: number) => {
+    // Bidirectional linking: clicking an AST node could scroll the editor to this line.
+    // The editor highlights the current execution line via the store already.
   }, []);
 
   if (parseError) {

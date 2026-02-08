@@ -27,8 +27,7 @@ function getNodeCategory(type: string): NodeCategory {
   ];
   const expressions = [
     'CallExpression', 'MemberExpression', 'AssignmentExpression',
-    'BinaryExpression', 'LogicalExpression', 'UnaryExpression',
-    'UpdateExpression', 'ConditionalExpression', 'ArrowFunctionExpression',
+    'ConditionalExpression', 'ArrowFunctionExpression',
     'FunctionExpression', 'NewExpression', 'ArrayExpression',
     'ObjectExpression', 'TemplateLiteral', 'SpreadElement',
   ];
@@ -288,10 +287,7 @@ export function buildCallTree(snapshots: ExecutionState[]): CallTreeNode | null 
       // Function returned - pop the stack
       const popCount = prevDepth - currentDepth;
       for (let i = 0; i < popCount; i++) {
-        const returned = parentStack.pop();
-        if (returned && snap.callStack.length === 0 && parentStack.length === 1) {
-          // Back at top level
-        }
+        parentStack.pop();
       }
     }
 
