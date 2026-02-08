@@ -5,8 +5,11 @@ import VariablesPanel from './components/panels/VariablesPanel';
 import CallStackPanel from './components/panels/CallStackPanel';
 import ConsolePanel from './components/panels/ConsolePanel';
 import TimelinePanel from './components/panels/TimelinePanel';
+import ASTPanel from './components/panels/ASTPanel';
+import CallTreePanel from './components/panels/CallTreePanel';
+import CFGPanel from './components/panels/CFGPanel';
 
-type PanelTab = 'variables' | 'callstack' | 'console' | 'timeline';
+type PanelTab = 'variables' | 'callstack' | 'console' | 'timeline' | 'ast' | 'calltree' | 'cfg';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<PanelTab>('variables');
@@ -16,6 +19,9 @@ export default function App() {
     { id: 'callstack', label: 'Call Stack', icon: '📚' },
     { id: 'console', label: 'Console', icon: '💻' },
     { id: 'timeline', label: 'Timeline', icon: '⏱️' },
+    { id: 'ast', label: 'AST', icon: '🌳' },
+    { id: 'calltree', label: 'Call Tree', icon: '🔀' },
+    { id: 'cfg', label: 'CFG', icon: '📐' },
   ];
 
   return (
@@ -62,6 +68,9 @@ export default function App() {
             {activeTab === 'callstack' && <CallStackPanel />}
             {activeTab === 'console' && <ConsolePanel />}
             {activeTab === 'timeline' && <TimelinePanel />}
+            {activeTab === 'ast' && <ASTPanel />}
+            {activeTab === 'calltree' && <CallTreePanel />}
+            {activeTab === 'cfg' && <CFGPanel />}
           </div>
         </div>
       </div>
