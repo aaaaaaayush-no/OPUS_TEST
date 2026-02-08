@@ -4,6 +4,7 @@
  */
 import { useState, useCallback, useRef } from 'react';
 import { useCursorState, CURSOR_COLORS } from './cursorState';
+import { useExecutionStore } from '../../store/executionStore';
 
 interface PopupWindowProps {
   visible: boolean;
@@ -43,6 +44,8 @@ export default function PopupWindow({ visible, onClose }: PopupWindowProps) {
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 80 });
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+  const stepBackward = useExecutionStore((s) => s.stepBackward);
+  const stepForward = useExecutionStore((s) => s.stepForward);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     dragRef.current = {
@@ -238,23 +241,13 @@ export default function PopupWindow({ visible, onClose }: PopupWindowProps) {
         <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
           <button
             className="cf-btn cf-btn-sm"
-            onClick={() => {
-              const store = (window as unknown as Record<string, unknown>).__executionStore;
-              if (store && typeof (store as Record<string, unknown>).stepBackward === 'function') {
-                (store as { stepBackward: () => void }).stepBackward();
-              }
-            }}
+            onClick={stepBackward}
           >
             ◀ Previous
           </button>
           <button
             className="cf-btn cf-btn-sm"
-            onClick={() => {
-              const store = (window as unknown as Record<string, unknown>).__executionStore;
-              if (store && typeof (store as Record<string, unknown>).stepForward === 'function') {
-                (store as { stepForward: () => void }).stepForward();
-              }
-            }}
+            onClick={stepForward}
           >
             Next ▶
           </button>

@@ -133,7 +133,9 @@ export function getStepDetails(snapshots: ExecutionState[], stepIndex: number) {
   const topFrame = current.callStack[current.callStack.length - 1];
   if (topFrame) {
     for (const [, v] of topFrame.localVariables) {
-      const prevFrame = previous?.callStack[previous.callStack.length - 1];
+      const prevFrame = previous && previous.callStack.length > 0
+        ? previous.callStack[previous.callStack.length - 1]
+        : undefined;
       const prevVal = prevFrame?.localVariables.get(v.name);
       variables.push({
         name: v.name,

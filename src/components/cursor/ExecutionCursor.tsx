@@ -130,7 +130,7 @@ export default function ExecutionCursor({
           color: 'var(--text-secondary)',
           fontFamily: 'var(--font-code)',
         }}>
-          {operationType === 'function-call' && `Calling ${details.currentFunction}(${details.callStack[details.callStack.length - 1]?.args.join(', ') ?? ''})`}
+          {operationType === 'function-call' && `Calling ${details.currentFunction}(${details.callStack.length > 0 ? details.callStack[details.callStack.length - 1].args.join(', ') : ''})`}
           {operationType === 'return' && `Returning from function`}
           {operationType === 'assignment' && `Variable assignment at line ${currentLine}`}
           {operationType === 'conditional' && `Evaluating condition`}
