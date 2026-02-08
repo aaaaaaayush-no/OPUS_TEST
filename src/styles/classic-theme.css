@@ -755,6 +755,22 @@ body {
   background: var(--accent-blue);
 }
 
+/* ===== Horizontal Resizable Splitter (top/bottom) ===== */
+.cf-splitter-horizontal {
+  height: 5px;
+  cursor: row-resize;
+  background: var(--border-light);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  transition: background 0.15s ease;
+}
+
+.cf-splitter-horizontal:hover,
+.cf-splitter-horizontal:active {
+  background: var(--accent-blue);
+}
+
 /* ===== Popup Resize Handle ===== */
 .cf-popup-resize-handle {
   position: absolute;
