@@ -8,6 +8,7 @@ import TimelinePanel from './components/panels/TimelinePanel';
 import ASTPanel from './components/panels/ASTPanel';
 import CallTreePanel from './components/panels/CallTreePanel';
 import CFGPanel from './components/panels/CFGPanel';
+import FlowchartPanel from './components/panels/FlowchartPanel';
 import ExecutionCursor from './components/cursor/ExecutionCursor';
 import PopupWindow from './components/cursor/PopupWindow';
 import CursorControlPanel from './components/cursor/CursorControlPanel';
@@ -15,7 +16,7 @@ import ExecutionTimeline from './components/cursor/ExecutionTimeline';
 import ResizableSplitter from './components/ResizableSplitter';
 import { useExecutionStore } from './store/executionStore';
 
-type PanelTab = 'variables' | 'callstack' | 'console' | 'timeline' | 'ast' | 'calltree' | 'cfg';
+type PanelTab = 'variables' | 'callstack' | 'console' | 'timeline' | 'ast' | 'calltree' | 'cfg' | 'flowchart';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<PanelTab>('variables');
@@ -46,6 +47,7 @@ export default function App() {
     { id: 'ast', label: 'AST', icon: '🌳' },
     { id: 'calltree', label: 'Call Tree', icon: '🔀' },
     { id: 'cfg', label: 'CFG', icon: '📐' },
+    { id: 'flowchart', label: 'Flowchart', icon: '🔷' },
   ];
 
   const currentFunction = currentSnapshot?.callStack.length
@@ -109,6 +111,7 @@ export default function App() {
             {activeTab === 'ast' && <ASTPanel />}
             {activeTab === 'calltree' && <CallTreePanel />}
             {activeTab === 'cfg' && <CFGPanel />}
+            {activeTab === 'flowchart' && <FlowchartPanel />}
           </div>
 
           {/* Cursor Control Panel */}

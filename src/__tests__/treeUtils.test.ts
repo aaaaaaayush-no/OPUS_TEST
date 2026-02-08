@@ -249,6 +249,46 @@ describe('buildCFG', () => {
     const cfg = buildCFG('function foo() { return 1; }');
     const funcNode = cfg.nodes.find((n) => n.label.includes('function foo'));
     expect(funcNode).toBeDefined();
+    expect(funcNode!.type).toBe('functionCall');
+  });
+
+  it('should handle try-catch statements', () => {
+    const cfg = buildCFG('try { let x = 1; } catch (e) { let y = 2; }');
+    const tryNode = cfg.nodes.find((n) => n.type === 'trycatch' && n.label.includes('try'));
+    expect(tryNode).toBeDefined();
+
+    // Should have an exception edge from try to catch
+    const exceptionEdge = cfg.edges.find((e) => e.type === 'exception');
+    expect(exceptionEdge).toBeDefined();
+    expect(exceptionEdge!.label).toBe('error');
+  });
+
+  it('should handle try-catch-finally statements', () => {
+    const cfg = buildCFG('try { let x = 1; } catch (e) { let y = 2; } finally { let z = 3; }');
+    const tryNode = cfg.nodes.find((n) => n.type === 'trycatch' && n.label.includes('try'));
+    expect(tryNode).toBeDefined();
+
+    const finallyNode = cfg.nodes.find((n) => n.label === 'finally');
+    expect(finallyNode).toBeDefined();
+  });
+
+  it('should support all edge types in type system', () => {
+    // Verify the edge types are properly typed
+    const cfg = buildCFG(`
+      function foo() { return 1; }
+      try {
+        if (true) {
+          for (let i = 0; i < 3; i++) { foo(); }
+        }
+      } catch (e) { let x = 1; }
+    `);
+
+    // Should have normal, true, false, loop-back, and exception edges
+    expect(cfg.edges.some((e) => e.type === 'normal')).toBe(true);
+    expect(cfg.edges.some((e) => e.type === 'true')).toBe(true);
+    expect(cfg.edges.some((e) => e.type === 'false')).toBe(true);
+    expect(cfg.edges.some((e) => e.type === 'loop-back')).toBe(true);
+    expect(cfg.edges.some((e) => e.type === 'exception')).toBe(true);
   });
 });
 
