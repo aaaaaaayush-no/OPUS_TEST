@@ -17,6 +17,10 @@ const NODE_STYLES: Record<CFGNode['type'], { fill: string; stroke: string; textF
   loop:         { fill: '#F5F3FF', stroke: '#7C3AED', textFill: '#5B21B6' },
   functionCall: { fill: '#EFF6FF', stroke: '#2563EB', textFill: '#1D4ED8' },
   return:       { fill: '#FFF7ED', stroke: '#EA580C', textFill: '#C2410C' },
+  input:        { fill: '#E0F7FA', stroke: '#50E3C2', textFill: '#00796B' },
+  output:       { fill: '#E0F7FA', stroke: '#50E3C2', textFill: '#00796B' },
+  annotation:   { fill: '#FFFDE7', stroke: '#95A5A6', textFill: '#666666' },
+  trycatch:     { fill: '#FFF3E0', stroke: '#F5A623', textFill: '#E65100' },
 };
 
 const NODE_STROKE_COLORS: Record<CFGNode['type'], string> = {
@@ -27,6 +31,10 @@ const NODE_STROKE_COLORS: Record<CFGNode['type'], string> = {
   loop:         '#7C3AED',
   functionCall: '#2563EB',
   return:       '#EA580C',
+  input:        '#50E3C2',
+  output:       '#50E3C2',
+  annotation:   '#95A5A6',
+  trycatch:     '#F5A623',
 };
 
 // ─── Edge styling ───────────────────────────────────────────────────────────
@@ -36,6 +44,10 @@ function getEdgeStrokeColor(edge: CFGEdge): string {
       case 'true': return '#059669';
       case 'false': return '#DC2626';
       case 'loop-back': return '#7C3AED';
+      case 'function-call': return '#F5A623';
+      case 'return': return '#BD10E0';
+      case 'exception': return '#D0021B';
+      case 'async': return '#50E3C2';
       default: return '#2563EB';
     }
   }
@@ -47,6 +59,10 @@ function getEdgeLabelFill(edge: CFGEdge): string {
     case 'true': return '#059669';
     case 'false': return '#DC2626';
     case 'loop-back': return '#7C3AED';
+    case 'function-call': return '#F5A623';
+    case 'return': return '#BD10E0';
+    case 'exception': return '#D0021B';
+    case 'async': return '#50E3C2';
     default: return '#6B7280';
   }
 }

@@ -49,10 +49,16 @@ export interface CallTreeNode {
 /** Control Flow Graph node */
 export interface CFGNode {
   id: string;
-  type: 'start' | 'end' | 'statement' | 'condition' | 'loop' | 'functionCall' | 'return';
+  type: 'start' | 'end' | 'statement' | 'condition' | 'loop' | 'functionCall' | 'return' | 'input' | 'output' | 'annotation' | 'trycatch';
   label: string;
   lineNumber?: number;
   wasExecuted?: boolean;
+  /** Source code text for the node */
+  code?: string;
+  /** Number of times this node was executed */
+  executionCount?: number;
+  /** Whether this node is currently being executed */
+  isExecuting?: boolean;
 }
 
 /** Control Flow Graph edge */
@@ -60,7 +66,7 @@ export interface CFGEdge {
   source: string;
   target: string;
   label?: string;
-  type: 'normal' | 'true' | 'false' | 'loop-back';
+  type: 'normal' | 'true' | 'false' | 'loop-back' | 'function-call' | 'return' | 'exception' | 'async';
   wasExecuted?: boolean;
 }
 

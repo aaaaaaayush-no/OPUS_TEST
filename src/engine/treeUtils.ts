@@ -396,6 +396,7 @@ function getCFGNodeType(astType: string): CFGNode['type'] {
     case 'DoWhileStatement': return 'loop';
     case 'ReturnStatement': return 'return';
     case 'CallExpression': return 'functionCall';
+    case 'TryStatement': return 'trycatch';
     default: return 'statement';
   }
 }
@@ -449,6 +450,8 @@ function getCFGLabel(node: ASTNode): string {
       const id = (node as ASTNode & { id: ASTNode | null }).id;
       return `${prefix}function ${id ? (id as ASTNode & { name: string }).name : '<anon>'}`;
     }
+    case 'TryStatement':
+      return `${prefix}try`;
     default:
       return `${prefix}${node.type}`;
   }
@@ -585,16 +588,83 @@ function processCFGNode(
     }
 
     case 'FunctionDeclaration': {
-      // Show function as a single block (don't expand body in main CFG)
+      // Show function as a subroutine node (double border)
       const funcNode: CFGNode = {
         id: `cfg-${cfgIdCounter++}`,
-        type: 'statement',
+        type: 'functionCall',
         label: getCFGLabel(node),
         lineNumber: loc?.start.line,
       };
       nodes.push(funcNode);
       edges.push({ source: prevId, target: funcNode.id, type: 'normal' });
       return funcNode.id;
+    }
+
+    case 'TryStatement': {
+      const tryNode: CFGNode = {
+        id: `cfg-${cfgIdCounter++}`,
+        type: 'trycatch',
+        label: getCFGLabel(node),
+        lineNumber: loc?.start.line,
+      };
+      nodes.push(tryNode);
+      edges.push({ source: prevId, target: tryNode.id, type: 'normal' });
+
+      // Merge point after try-catch
+      const mergeNode: CFGNode = {
+        id: `cfg-${cfgIdCounter++}`,
+        type: 'statement',
+        label: 'end try',
+        lineNumber: loc?.start.line,
+      };
+      nodes.push(mergeNode);
+
+      // Try block body
+      const tryBlock = (node as ASTNode & { block: ASTNode }).block;
+      const tryBody = (tryBlock as ASTNode & { body: ASTNode[] }).body;
+      if (tryBody.length > 0) {
+        const tryEnd = processCFGStatements(tryBody, tryNode.id, endId, nodes, edges);
+        edges.push({ source: tryEnd, target: mergeNode.id, type: 'normal' });
+      } else {
+        edges.push({ source: tryNode.id, target: mergeNode.id, type: 'normal' });
+      }
+
+      // Catch block
+      const handler = (node as ASTNode & { handler: ASTNode | null }).handler;
+      if (handler) {
+        const catchNode: CFGNode = {
+          id: `cfg-${cfgIdCounter++}`,
+          type: 'trycatch',
+          label: `L${(handler.loc as { start: { line: number } })?.start.line || ''}: catch`,
+          lineNumber: (handler.loc as { start: { line: number } })?.start.line,
+        };
+        nodes.push(catchNode);
+        edges.push({ source: tryNode.id, target: catchNode.id, label: 'error', type: 'exception' });
+
+        const catchBody = ((handler as ASTNode & { body: ASTNode }).body as ASTNode & { body: ASTNode[] }).body;
+        if (catchBody.length > 0) {
+          const catchEnd = processCFGStatements(catchBody, catchNode.id, endId, nodes, edges);
+          edges.push({ source: catchEnd, target: mergeNode.id, type: 'normal' });
+        } else {
+          edges.push({ source: catchNode.id, target: mergeNode.id, type: 'normal' });
+        }
+      }
+
+      // Finally block
+      const finalizer = (node as ASTNode & { finalizer: ASTNode | null }).finalizer;
+      if (finalizer) {
+        const finallyNode: CFGNode = {
+          id: `cfg-${cfgIdCounter++}`,
+          type: 'statement',
+          label: 'finally',
+          lineNumber: (finalizer.loc as { start: { line: number } })?.start.line,
+        };
+        nodes.push(finallyNode);
+        edges.push({ source: mergeNode.id, target: finallyNode.id, type: 'normal' });
+        return finallyNode.id;
+      }
+
+      return mergeNode.id;
     }
 
     default: {
