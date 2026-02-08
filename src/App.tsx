@@ -47,7 +47,7 @@ export default function App() {
     { id: 'ast', label: 'AST', icon: '🌳' },
     { id: 'calltree', label: 'Call Tree', icon: '🔀' },
     { id: 'cfg', label: 'CFG', icon: '📐' },
-    { id: 'flowchart', label: 'Flowchart', icon: '🔀' },
+    { id: 'flowchart', label: 'Flowchart', icon: '🔷' },
   ];
 
   const currentFunction = currentSnapshot?.callStack.length

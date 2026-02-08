@@ -144,7 +144,7 @@ function computeLayout(cfg: ControlFlowGraph): { layoutNodes: LayoutNode[]; widt
     const startX = -totalWidth / 2;
     for (let i = 0; i < nodes.length; i++) {
       const w = nodes[i].type === 'condition' ? DIAMOND_SIZE * 2 + 40 : NODE_WIDTH;
-      const h = (nodes[i].type === 'start' || nodes[i].type === 'end') ? NODE_HEIGHT : NODE_HEIGHT;
+      const h = NODE_HEIGHT;
       const x = startX + i * (NODE_WIDTH + NODE_GAP) + NODE_WIDTH / 2;
       const y = layer * (NODE_HEIGHT + LAYER_GAP) + PADDING;
       layoutNodes.push({ node: nodes[i], x, y, width: w, height: h, layer });
@@ -720,12 +720,13 @@ function Minimap({ layoutNodes, edges, nodeMap, totalWidth, totalHeight, viewBox
           const src = nodeMap.get(edge.source);
           const tgt = nodeMap.get(edge.target);
           if (!src || !tgt) return null;
+          const xOff = mmW / 2 * (1 - scale * 2);
           return (
             <line
               key={`mm-e-${i}`}
-              x1={(src.x + offsetX) * scale + mmW / 2 * (1 - scale * 2)}
+              x1={(src.x + offsetX) * scale + xOff}
               y1={(src.y + NODE_HEIGHT / 2) * scale}
-              x2={(tgt.x + offsetX) * scale + mmW / 2 * (1 - scale * 2)}
+              x2={(tgt.x + offsetX) * scale + xOff}
               y2={(tgt.y + NODE_HEIGHT / 2) * scale}
               stroke={edge.wasExecuted ? EDGE_COLORS[edge.type] || '#4A90E2' : '#E5E7EB'}
               strokeWidth={0.5}
@@ -733,17 +734,20 @@ function Minimap({ layoutNodes, edges, nodeMap, totalWidth, totalHeight, viewBox
           );
         })}
         {/* Nodes */}
-        {layoutNodes.map((ln) => (
-          <rect
-            key={`mm-n-${ln.node.id}`}
-            x={(ln.x + offsetX - 4) * scale + mmW / 2 * (1 - scale * 2)}
-            y={(ln.y) * scale}
-            width={8 * scale + 2}
-            height={4 * scale + 2}
-            rx={1}
-            fill={ln.node.wasExecuted ? (NODE_STYLES[ln.node.type]?.stroke || '#6B7280') : '#E5E7EB'}
-          />
-        ))}
+        {(() => {
+          const xOff = mmW / 2 * (1 - scale * 2);
+          return layoutNodes.map((ln) => (
+            <rect
+              key={`mm-n-${ln.node.id}`}
+              x={(ln.x + offsetX - 4) * scale + xOff}
+              y={(ln.y) * scale}
+              width={8 * scale + 2}
+              height={4 * scale + 2}
+              rx={1}
+              fill={ln.node.wasExecuted ? (NODE_STYLES[ln.node.type]?.stroke || '#6B7280') : '#E5E7EB'}
+            />
+          ));
+        })()}
         {/* Viewport indicator */}
         <rect
           x={Math.max(0, viewBox.x * scale)}

@@ -588,7 +588,7 @@ function processCFGNode(
     }
 
     case 'FunctionDeclaration': {
-      // Show function as a subroutine node (double border)
+      // Create a functionCall-type CFG node; visual styling (double border) is applied in FlowchartPanel
       const funcNode: CFGNode = {
         id: `cfg-${cfgIdCounter++}`,
         type: 'functionCall',
