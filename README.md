@@ -1,73 +1,78 @@
-# React + TypeScript + Vite
+# ⚡ Code Visualizer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A production-grade, real-time JavaScript code execution visualizer built with React, TypeScript, and a custom AST interpreter.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Step-by-step execution** — Walk through code line by line, forward and backward
+- **Time-travel debugging** — Jump to any previous execution state
+- **Variable tracking** — See variables change in real-time with type information
+- **Call stack visualization** — Track function calls, arguments, and return values
+- **Console output** — View console.log/warn/error output at each step
+- **Execution timeline** — Visual overview of execution with line-frequency analysis
+- **Breakpoints** — Click the gutter to set line breakpoints
+- **Auto-play** — Automatically step through execution with adjustable speed
+- **Infinite loop detection** — Safely stops execution that exceeds step limits
 
-## React Compiler
+## Supported JavaScript Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Variables (`let`, `const`, `var`)
+- Functions (declarations, expressions, arrow functions)
+- Control flow (`if`/`else`, `switch`, ternary)
+- Loops (`for`, `while`, `break`, `continue`)
+- Arrays and Objects
+- Template literals
+- Try/catch/finally
+- Logical operators (`&&`, `||`, `??`)
+- Assignment operators (`+=`, `-=`, `*=`, `/=`)
+- Recursive functions
+- Built-in globals (`Math`, `console`, `JSON`, etc.)
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **Framework**: React 19 + TypeScript
+- **Build**: Vite
+- **Editor**: Monaco Editor
+- **State**: Zustand
+- **Parser**: Acorn (ECMAScript 2022)
+- **Styling**: Tailwind CSS v4
+- **Testing**: Vitest
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Scripts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Type-check and build for production |
+| `npm run lint` | Run ESLint |
+| `npm run test` | Run unit tests |
+| `npm run preview` | Preview production build |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Architecture
+
+```
+src/
+├── engine/
+│   ├── types.ts          # Core type definitions (ExecutionState, StackFrame, Variable)
+│   └── interpreter.ts    # Acorn-based JS interpreter with state snapshots
+├── store/
+│   └── executionStore.ts # Zustand store for execution & time-travel state
+├── components/
+│   ├── CodeEditor.tsx    # Monaco Editor with breakpoints & line highlighting
+│   ├── Controls.tsx      # Execution controls (run, step, pause, speed)
+│   └── panels/
+│       ├── VariablesPanel.tsx  # Variable/scope inspector
+│       ├── CallStackPanel.tsx  # Call stack visualization
+│       ├── ConsolePanel.tsx    # Console output display
+│       └── TimelinePanel.tsx   # Execution timeline with time-travel
+├── App.tsx               # Main layout with split panels
+├── main.tsx              # Entry point
+└── index.css             # Tailwind CSS imports
 ```
