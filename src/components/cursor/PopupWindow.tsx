@@ -43,7 +43,9 @@ export default function PopupWindow({ visible, onClose }: PopupWindowProps) {
   const [isPinned, setIsPinned] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [position, setPosition] = useState({ x: 20, y: 80 });
+  const [size, setSize] = useState({ width: 380, height: 420 });
   const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+  const resizeRef = useRef<{ startX: number; startY: number; origW: number; origH: number } | null>(null);
   const stepBackward = useExecutionStore((s) => s.stepBackward);
   const stepForward = useExecutionStore((s) => s.stepForward);
 
@@ -72,6 +74,38 @@ export default function PopupWindow({ visible, onClose }: PopupWindowProps) {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
   }, [position]);
+
+  const handleResizeMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    resizeRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origW: size.width,
+      origH: size.height,
+    };
+
+    const handleMouseMove = (ev: MouseEvent) => {
+      if (!resizeRef.current) return;
+      setSize({
+        width: Math.max(280, resizeRef.current.origW + (ev.clientX - resizeRef.current.startX)),
+        height: Math.max(200, resizeRef.current.origH + (ev.clientY - resizeRef.current.startY)),
+      });
+    };
+
+    const handleMouseUp = () => {
+      resizeRef.current = null;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    document.body.style.cursor = 'nwse-resize';
+    document.body.style.userSelect = 'none';
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  }, [size]);
 
   if (!visible || !details) return null;
 
@@ -107,6 +141,10 @@ export default function PopupWindow({ visible, onClose }: PopupWindowProps) {
         position: 'fixed',
         left: position.x,
         top: position.y,
+        width: size.width,
+        height: size.height,
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       {/* Titlebar */}
@@ -142,7 +180,7 @@ export default function PopupWindow({ visible, onClose }: PopupWindowProps) {
       </div>
 
       {/* Body */}
-      <div className="cf-popup-body">
+      <div className="cf-popup-body" style={{ flex: 1, overflow: 'auto' }}>
         {/* Operation Info */}
         <div className="cf-popup-section">
           <div className="cf-popup-section-title">📊 Operation Details</div>
@@ -253,6 +291,12 @@ export default function PopupWindow({ visible, onClose }: PopupWindowProps) {
           </button>
         </div>
       </div>
+
+      {/* Resize Handle */}
+      <div
+        className="cf-popup-resize-handle"
+        onMouseDown={handleResizeMouseDown}
+      />
     </div>
   );
 }

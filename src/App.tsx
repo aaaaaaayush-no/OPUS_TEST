@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import CodeEditor from './components/CodeEditor';
 import Controls from './components/Controls';
 import VariablesPanel from './components/panels/VariablesPanel';
@@ -12,6 +12,7 @@ import ExecutionCursor from './components/cursor/ExecutionCursor';
 import PopupWindow from './components/cursor/PopupWindow';
 import CursorControlPanel from './components/cursor/CursorControlPanel';
 import ExecutionTimeline from './components/cursor/ExecutionTimeline';
+import ResizableSplitter from './components/ResizableSplitter';
 import { useExecutionStore } from './store/executionStore';
 
 type PanelTab = 'variables' | 'callstack' | 'console' | 'timeline' | 'ast' | 'calltree' | 'cfg';
@@ -22,6 +23,11 @@ export default function App() {
   const [showTrail, setShowTrail] = useState(true);
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [trailLength, setTrailLength] = useState(10);
+  const [leftPanelWidth, setLeftPanelWidth] = useState(50);
+
+  const handleSplitterResize = useCallback((percent: number) => {
+    setLeftPanelWidth(percent);
+  }, []);
 
   const status = useExecutionStore((s) => s.status);
   const currentStepIndex = useExecutionStore((s) => s.currentStepIndex);
@@ -68,15 +74,18 @@ export default function App() {
       <ExecutionTimeline />
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+      <div style={{ flex: 1, display: 'flex', minHeight: 0, position: 'relative' }}>
         {/* Left Panel - Code Editor */}
-        <div style={{ width: '50%', display: 'flex', flexDirection: 'column', minHeight: 0, borderRight: '1px solid var(--border-light)' }}>
+        <div style={{ width: `${leftPanelWidth}%`, display: 'flex', flexDirection: 'column', minHeight: 0, minWidth: 0 }}>
           <ExecutionCursor showTrail={showTrail} trailLength={trailLength} showAnnotation={showAnnotations} />
           <CodeEditor />
         </div>
 
+        {/* Resizable Splitter */}
+        <ResizableSplitter onResize={handleSplitterResize} currentPercent={leftPanelWidth} />
+
         {/* Right Panel */}
-        <div style={{ width: '50%', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div style={{ width: `${100 - leftPanelWidth}%`, display: 'flex', flexDirection: 'column', minHeight: 0, minWidth: 0 }}>
           {/* Panel Tabs */}
           <div className="cf-tabs">
             {tabs.map((tab) => (
